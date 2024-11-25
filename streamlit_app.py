@@ -28,7 +28,7 @@ selected = option_menu(
 )
 
 if selected == 'Introduction':
-    st.title("California Housing Crisis 🏠")
+    st.title("Housing Crisis 🏠")
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         image_path = Image.open("housing_image.jpg")
