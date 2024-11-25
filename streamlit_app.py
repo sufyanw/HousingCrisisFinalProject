@@ -90,7 +90,8 @@ elif selected == 'Visualization':
 
     with tab3:
         st.subheader("Correlation Heatmap")
-        corr_matrix = df.corr()
+        numerical_columns = df.select_dtypes(include=[np.number]).columns
+        corr_matrix = df[numerical_columns].corr()
         fig, ax = plt.subplots(figsize=(12, 10))
         sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5, ax=ax)
         ax.set_title("Correlation Matrix")
