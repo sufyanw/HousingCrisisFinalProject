@@ -15,6 +15,9 @@ st.set_page_config(page_title='California Housing Crisis App')
 # Load Dataset
 df = pd.read_csv("housing.csv")
 
+#fill in missing values in dataset with the median value
+df['total_bedrooms'].fillna(df['total_bedrooms'].median(), inplace=True)
+
 # Navigation Menu
 selected = option_menu(
     menu_title=None,
