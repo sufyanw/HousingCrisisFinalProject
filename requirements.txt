@@ -7,4 +7,5 @@ matplotlib
 scikit-learn
 streamlit-option-menu
 dagshub
-pdk
+folium
+branca

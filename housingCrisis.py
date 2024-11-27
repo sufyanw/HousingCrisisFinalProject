@@ -2,7 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import codecs
-import pydeck as pdk
+import folium
+from folium.plugins import HeatMap
+from branca.colormap import linear
 from PIL import Image
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -72,6 +74,7 @@ elif selected == 'Visualization':
     with tab2:
         st.subheader("Geographic Heatmap of House Values")
 
+        # Create a cubehelix colormap for the heatmap colors
         cubehelix_cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=0.95, reverse=True, as_cmap=True)
 
         min_value = df['median_house_value'].min()
@@ -79,40 +82,41 @@ elif selected == 'Visualization':
 
         df['normalized_value'] = (df['median_house_value'] - min_value) / (max_value - min_value)
 
+        # Normalize the values to RGB using the colormap
         def get_rgb_color(value):
             rgba = cubehelix_cmap(value)  # Returns a tuple like (R, G, B, A) where each value is in [0, 1]
             return [int(c * 255) for c in rgba[:3]]  # Convert to RGB by scaling and truncating A
 
         df['color'] = df['normalized_value'].apply(get_rgb_color)
 
-        # Set size of the points based on normalized price
-        df['size'] = df['normalized_value'] * 100  # Normalize size to scale between 0 and 100
+        # Create the map centered around the average latitude and longitude of the data
+        m = folium.Map(location=[df['latitude'].mean(), df['longitude'].mean()], zoom_start=6)
 
-        # Create a Pydeck map
-        layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=df,
-            get_position=["longitude", "latitude"],
-            get_fill_color="color",  # Pydeck expects color to be an RGB list
-            get_radius="size",
-            radius_scale=10,
-            pickable=True,
-        )
+        # Prepare the data for HeatMap
+        heat_data = []
+        for idx, row in df.iterrows():
+            # Add each point's latitude, longitude, and normalized value to the heatmap data
+            heat_data.append([row['latitude'], row['longitude'], row['normalized_value']])
 
-        view_state = pdk.ViewState(
-            latitude=df['latitude'].mean(),
-            longitude=df['longitude'].mean(),
-            zoom=6,
-            pitch=0,
-        )
+        # Add a HeatMap layer to the map
+        HeatMap(heat_data, min_opacity=0.2, radius=15, blur=10, max_zoom=1).add_to(m)
 
-        map = pdk.Deck(
-            layers=[layer],
-            initial_view_state=view_state,
-            tooltip={"text": "Price: {median_house_value}"},
-        )
+        # Add CircleMarker layer for showing each house with size based on price and color based on value
+        for idx, row in df.iterrows():
+            folium.CircleMarker(
+                location=[row['latitude'], row['longitude']],
+                radius=row['normalized_value'] * 10,  # Scale size to normalized value
+                color='rgba({}, {}, {}, 1)'.format(*row['color']),  # Convert RGB to RGBA for color
+                fill=True,
+                fill_opacity=0.7,
+                tooltip=f"Price: ${row['median_house_value']:,}",
+            ).add_to(m)
 
-        st.pydeck_chart(map)
+        # Display the map in Streamlit
+        st.dataframe(df)  # Optionally display the dataframe
+        st.write("### Interactive Heatmap of House Values")
+        st.write("Zoom and pan the map to explore house values across the region.")
+        folium_static(m)
 
 
     with tab3:
