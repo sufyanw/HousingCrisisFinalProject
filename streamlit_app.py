@@ -70,24 +70,25 @@ elif selected == 'Visualization':
     with tab2:
         st.subheader("Geographic Heatmap of Median House Value")
 
-        # Define color based on price range
-        def price_to_color(value):
-            if value < 150000:
-                return [255, 0, 0]  # Red
-            elif value < 300000:
-                return [0, 0, 255]  # Blue
-            else:
-                return [0, 255, 0]  # Green
+        # Define color gradient from yellow (low) to green (high)
+        def price_to_color(value, min_value, max_value):
+            # Normalize the value to a range of 0 to 1
+            normalized = (value - min_value) / (max_value - min_value)
+            # Interpolate between yellow [255, 255, 0] and green [0, 255, 0]
+            r = int((1 - normalized) * 255)  # Red decreases as value increases
+            g = 255  # Green stays constant
+            b = 0  # No blue component
+            return [r, g, b]
+
+        # Calculate min and max for scaling
+        min_value = df['median_house_value'].min()
+        max_value = df['median_house_value'].max()
 
         # Add color and size columns to the dataframe
-        df['color'] = df['median_house_value'].apply(price_to_color)
-        df['size'] = (df['median_house_value'] - df['median_house_value'].min()) / (
-            df['median_house_value'].max() - df['median_house_value'].min()
-        ) * 100  # Normalize size to scale between 0 and 100
+        df['color'] = df['median_house_value'].apply(price_to_color, args=(min_value, max_value))
+        df['size'] = (df['median_house_value'] - min_value) / (max_value - min_value) * 100  # Normalize size to scale between 0 and 100
 
         # Create a Pydeck map
-        import pydeck as pdk
-
         layer = pdk.Layer(
             "ScatterplotLayer",
             data=df,
@@ -112,6 +113,7 @@ elif selected == 'Visualization':
         )
 
         st.pydeck_chart(map)
+
 
     with tab3:
         st.subheader("Correlation Heatmap")
