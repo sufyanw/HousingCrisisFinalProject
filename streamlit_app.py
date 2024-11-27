@@ -68,26 +68,25 @@ elif selected == 'Visualization':
         ax.set_title("Distribution of Housing Prices")
         st.pyplot(fig)
 
+
     with tab2:
         st.subheader("Geographic Heatmap of Median House Value")
 
-        # Define color gradient from yellow (low) to green (high)
-        def price_to_color(value, min_value, max_value):
-            # Normalize the value to a range of 0 to 1
-            normalized = (value - min_value) / (max_value - min_value)
-            # Interpolate between yellow [255, 255, 0] and green [0, 255, 0]
-            r = int((1 - normalized) * 255)  # Red decreases as value increases
-            g = 255  # Green stays constant
-            b = 0  # No blue component
-            return [r, g, b]
+        # Define color gradient using sns.cubehelix_palette
+        cubehelix_cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=0.95, reverse=True, as_cmap=True)
 
-        # Calculate min and max for scaling
+        # Normalize the values to map them onto the cubehelix palette
         min_value = df['median_house_value'].min()
         max_value = df['median_house_value'].max()
 
-        # Add color and size columns to the dataframe
-        df['color'] = df['median_house_value'].apply(price_to_color, args=(min_value, max_value))
-        df['size'] = (df['median_house_value'] - min_value) / (max_value - min_value) * 100  # Normalize size to scale between 0 and 100
+        # Normalize the median house values between 0 and 1
+        df['normalized_value'] = (df['median_house_value'] - min_value) / (max_value - min_value)
+
+        # Map the normalized values to the cubehelix color palette
+        df['color'] = df['normalized_value'].apply(lambda x: cubehelix_cmap(x))
+
+        # Set size of the points based on normalized price
+        df['size'] = df['normalized_value'] * 100  # Normalize size to scale between 0 and 100
 
         # Create a Pydeck map
         layer = pdk.Layer(
@@ -195,8 +194,6 @@ elif selected == "Explainable AI":
     ### Example Insights:
     Select an instance to analyze its SHAP explanation below.
     """)
-    # Placeholder for SHAP visualizations (requires more setup in actual implementation)
-    st.info("SHAP visualization coming soon!")
 
 elif selected == 'Conclusion':
     st.title("Conclusion 🏁")
