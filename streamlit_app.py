@@ -15,22 +15,23 @@ st.set_page_config(page_title='California Housing Crisis App')
 # Load Dataset
 df = pd.read_csv("housing.csv")
 
-#mL flow/daghub
+# MLFlow/DagHub Integration
 import dagshub
 dagshub.init(repo_owner='sufyanw', repo_name='blank-app-1', mlflow=True)
 
-#fill in missing values in dataset with the median value
+# Fill in missing values in dataset with the median value
 df['total_bedrooms'].fillna(df['total_bedrooms'].median(), inplace=True)
 
 # Navigation Menu
 selected = option_menu(
     menu_title=None,
-    options=["Introduction", "Exploration", "Visualization", "Prediction", "Conclusion"],
-    icons=["house", "search", "bar-chart-line", "lightbulb", "check-circle"],
+    options=["Introduction", "Visualization", "Prediction", "MLFlow", "Explainable AI", "Conclusion"],
+    icons=["house", "bar-chart-line", "lightbulb", "cloud", "robot", "check-circle"],
     default_index=0,
     orientation="horizontal",
 )
 
+# Pages
 if selected == 'Introduction':
     st.title("Housing Crisis 🏠")
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -54,35 +55,9 @@ if selected == 'Introduction':
     - Predictive modeling for housing prices.
     """)
 
-elif selected == 'Exploration':
-    st.title("Data Exploration 🔍")
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Dataset Head", "Dataset Tail", "Description", "Missing Values", "Generate Report"])
-
-    with tab1:
-        st.subheader("Head of the Dataset")
-        st.dataframe(df.head())
-
-    with tab2:
-        st.subheader("Tail of the Dataset")
-        st.dataframe(df.tail())
-
-    with tab3:
-        st.subheader("Description of the Dataset")
-        st.dataframe(df.describe())
-
-    with tab4:
-        st.subheader("Missing Values")
-        missing_data = df.isnull().sum() / len(df) * 100
-        total_missing = missing_data.sum().round(2)
-        st.write(missing_data)
-        if total_missing == 0.0:
-            st.success("There are no missing values!")
-        else:
-            st.warning("There are missing values.")
-
 elif selected == 'Visualization':
     st.title("Data Visualization 📊")
-    tab1, tab2, tab3, tab4 = st.tabs(["Price Distribution", "Geographic Heatmap", "Correlation Heatmap", "Feature Relationships"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Price Distribution", "Geographic Heatmap", "Correlation Heatmap", "Feature Relationships", "Generate Report"])
 
     with tab1:
         st.subheader("Price Distribution")
@@ -113,6 +88,18 @@ elif selected == 'Visualization':
         ax.set_title(f"Relationship Between {x_feature} and {y_feature}")
         st.pyplot(fig)
 
+    with tab5:
+        if st.button("Generate Report"):
+            def read_html_report(file_path):
+                with codecs.open(file_path, 'r', encoding="utf-8") as f:
+                    return f.read()
+            
+            html_report = read_html_report('housing_report.html')
+            
+            st.title("Streamlit Quality Report")
+            st.components.v1.html(html_report, height=1000, scrolling=True)
+
+
 elif selected == "Prediction":
     st.title("Predicting Housing Prices 💡")
     numeric_columns = df.select_dtypes(include=[np.number]).columns
@@ -135,6 +122,35 @@ elif selected == "Prediction":
         st.write("### Prediction Results")
         st.write(f"Mean Absolute Error (MAE): {mae:.2f}")
         st.write(f"R² Score: {r2:.2f}")
+
+elif selected == "MLFlow":
+    st.title("MLFlow Integration 🌩️")
+    st.write("""
+    ## Model Tracking with MLFlow
+    This app integrates MLFlow through DagHub to track the following:
+    - Experiment runs and parameters.
+    - Performance metrics (MAE, R² Score).
+    - Model artifacts for reproducibility.
+    
+    ### How to Access
+    Visit the [MLFlow Dashboard](https://dagshub.com/sufyanw/blank-app-1) for detailed experiment tracking.
+    """)
+
+elif selected == "Explainable AI":
+    st.title("Explainable AI 🔎🤖")
+    st.write("""
+    ## Explainable AI for Model Insights
+    To make the predictions transparent and interpretable, we use **SHAP (SHapley Additive exPlanations)**.
+
+    ### Key Features:
+    - Understand feature contributions to each prediction.
+    - Visualize the global importance of features.
+
+    ### Example Insights:
+    Select an instance to analyze its SHAP explanation below.
+    """)
+    # Placeholder for SHAP visualizations (requires more setup in actual implementation)
+    st.info("SHAP visualization coming soon!")
 
 elif selected == 'Conclusion':
     st.title("Conclusion 🏁")
