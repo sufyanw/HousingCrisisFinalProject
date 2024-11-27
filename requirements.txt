@@ -6,5 +6,5 @@ seaborn
 matplotlib
 scikit-learn
 streamlit-option-menu
-dagshub
+# dagshub
 pydeck

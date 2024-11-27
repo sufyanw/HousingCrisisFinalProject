@@ -17,8 +17,8 @@ st.set_page_config(page_title='California Housing Crisis App')
 # Load Dataset
 df = pd.read_csv("housing.csv")
 
-import dagshub
-dagshub.init(repo_owner='sufyanw', repo_name='HousingCrisisFinalProject', mlflow=True)
+# import dagshub
+# dagshub.init(repo_owner='sufyanw', repo_name='HousingCrisisFinalProject', mlflow=True)
 
 # Fill in missing values in dataset with the median value
 df['total_bedrooms'].fillna(df['total_bedrooms'].median(), inplace=True)
@@ -182,22 +182,11 @@ elif selected == "MLFlow":
     - Model artifacts for reproducibility.
     
     ### How to Access
-    Visit the [MLFlow Dashboard](https://dagshub.com/sufyanw/blank-app-1) for detailed experiment tracking.
+    Visit the [MLFlow Dashboard] for detailed experiment tracking.
     """)
 
 elif selected == "Explainable AI":
     st.title("Explainable AI 🔎🤖")
-    st.write("""
-    ## Explainable AI for Model Insights
-    To make the predictions transparent and interpretable, we use **SHAP (SHapley Additive exPlanations)**.
-
-    ### Key Features:
-    - Understand feature contributions to each prediction.
-    - Visualize the global importance of features.
-
-    ### Example Insights:
-    Select an instance to analyze its SHAP explanation below.
-    """)
 
 elif selected == 'Conclusion':
     st.title("Conclusion 🏁")
