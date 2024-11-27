@@ -7,5 +7,4 @@ matplotlib
 scikit-learn
 streamlit-option-menu
 dagshub
-folium
-branca
+pydeck
