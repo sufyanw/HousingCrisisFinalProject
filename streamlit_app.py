@@ -15,6 +15,10 @@ st.set_page_config(page_title='California Housing Crisis App')
 # Load Dataset
 df = pd.read_csv("housing.csv")
 
+#mL flow/daghub
+import dagshub
+dagshub.init(repo_owner='sufyanw', repo_name='blank-app-1', mlflow=True)
+
 #fill in missing values in dataset with the median value
 df['total_bedrooms'].fillna(df['total_bedrooms'].median(), inplace=True)
 
