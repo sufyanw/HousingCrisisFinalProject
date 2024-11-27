@@ -70,20 +70,20 @@ elif selected == 'Visualization':
 
 
     with tab2:
-        st.subheader("Geographic Heatmap of Median House Value")
+        st.subheader("Geographic Heatmap of House Values")
 
-        # Define color gradient using sns.cubehelix_palette
         cubehelix_cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=0.95, reverse=True, as_cmap=True)
 
-        # Normalize the values to map them onto the cubehelix palette
         min_value = df['median_house_value'].min()
         max_value = df['median_house_value'].max()
 
-        # Normalize the median house values between 0 and 1
         df['normalized_value'] = (df['median_house_value'] - min_value) / (max_value - min_value)
 
-        # Map the normalized values to the cubehelix color palette
-        df['color'] = df['normalized_value'].apply(lambda x: cubehelix_cmap(x))
+        def get_rgb_color(value):
+            rgba = cubehelix_cmap(value)  # Returns a tuple like (R, G, B, A) where each value is in [0, 1]
+            return [int(c * 255) for c in rgba[:3]]  # Convert to RGB by scaling and truncating A
+
+        df['color'] = df['normalized_value'].apply(get_rgb_color)
 
         # Set size of the points based on normalized price
         df['size'] = df['normalized_value'] * 100  # Normalize size to scale between 0 and 100
@@ -93,7 +93,7 @@ elif selected == 'Visualization':
             "ScatterplotLayer",
             data=df,
             get_position=["longitude", "latitude"],
-            get_fill_color="color",
+            get_fill_color="color",  # Pydeck expects color to be an RGB list
             get_radius="size",
             radius_scale=10,
             pickable=True,
