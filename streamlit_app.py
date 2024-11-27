@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import codecs
 from PIL import Image
 import seaborn as sns
 import matplotlib.pyplot as plt
