@@ -69,7 +69,49 @@ elif selected == 'Visualization':
 
     with tab2:
         st.subheader("Geographic Heatmap of Median House Value")
-        st.map(df[['latitude', 'longitude']])
+
+        # Define color based on price range
+        def price_to_color(value):
+            if value < 150000:
+                return [255, 0, 0]  # Red
+            elif value < 300000:
+                return [0, 0, 255]  # Blue
+            else:
+                return [0, 255, 0]  # Green
+
+        # Add color and size columns to the dataframe
+        df['color'] = df['median_house_value'].apply(price_to_color)
+        df['size'] = (df['median_house_value'] - df['median_house_value'].min()) / (
+            df['median_house_value'].max() - df['median_house_value'].min()
+        ) * 100  # Normalize size to scale between 0 and 100
+
+        # Create a Pydeck map
+        import pydeck as pdk
+
+        layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=df,
+            get_position=["longitude", "latitude"],
+            get_fill_color="color",
+            get_radius="size",
+            radius_scale=10,
+            pickable=True,
+        )
+
+        view_state = pdk.ViewState(
+            latitude=df['latitude'].mean(),
+            longitude=df['longitude'].mean(),
+            zoom=6,
+            pitch=0,
+        )
+
+        map = pdk.Deck(
+            layers=[layer],
+            initial_view_state=view_state,
+            tooltip={"text": "Price: {median_house_value}"},
+        )
+
+        st.pydeck_chart(map)
 
     with tab3:
         st.subheader("Correlation Heatmap")
